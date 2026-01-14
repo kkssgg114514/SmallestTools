@@ -4,6 +4,7 @@ project(PngTool LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(Sources/public)
+include_directories(../../FileTools/Sources/public)
 aux_source_directory(Sources/private SOURCES)
 
 add_executable(PngTool main.cpp ${SOURCES})
