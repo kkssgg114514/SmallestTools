@@ -37,10 +37,25 @@ public:
 	// 从偏移读取指定长度
 	FileHintCode read(size_t st_Offset, uint8_t* pU8t_Buffer, size_t st_Length) const;
 
+	// 覆盖写入数据
+	FileHintCode write(size_t st_Offset, const uint8_t* pU8t_Data, size_t st_Length);
+
+	// 重新写入指定长度数据, 删除原有数据
+	FileHintCode rewrite(const uint8_t* pU8t_Data, size_t st_Length);
+
+	// 追加写入数据
+	FileHintCode append(const uint8_t* pU8t_Data, size_t st_Length);
+
+	// 刷新缓冲区,将数据写入文件
+	FileHintCode flush();
+
 private:
 	// 为了 ABI 稳定,采取不透明实现,将使用 STL 的地方包装在 cpp 里面
 	struct Impl;
 	Impl* p_Impl;
+
+	// 文件路径
+	char* pSz_FilePath;
 };
 
 

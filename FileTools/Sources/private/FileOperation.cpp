@@ -18,6 +18,8 @@ FileOperation::FileOperation(const char *pSz_FilePath) : p_Impl(new Impl)
 	{
 		throw std::invalid_argument("FilePath is null");
 	}
+	// 文件路径
+	this->pSz_FilePath = strdup(pSz_FilePath);
 	// 以现代方式读取
 	std::ifstream fs_File(pSz_FilePath, std::ios::binary | std::ios::ate);
 	if (!fs_File)
@@ -40,6 +42,7 @@ FileOperation::~FileOperation()
 {
 	// 通过析构函数删除
 	delete p_Impl;
+	delete pSz_FilePath;
 }
 
 FileHintCode FileOperation::size(size_t &refSt_OutSize) const
@@ -93,4 +96,53 @@ FileOperation &FileOperation::operator=(FileOperation && fo_Other) noexcept
 		fo_Other.p_Impl = nullptr;
 	}
 	return *this;
+}
+
+FileHintCode FileOperation::write(size_t st_Offset, const uint8_t *pU8t_Data, size_t st_Length)
+{
+    if (!p_Impl || !pU8t_Data)
+    {
+        return FileHintCode::InvalidParameter;
+    }
+    // 即使超出长度也可以写入,会自动扩容
+    p_Impl->vecU8t_Buffer.resize(st_Offset + st_Length);
+    // 写入数据
+    std::memcpy(p_Impl->vecU8t_Buffer.data() + st_Offset, pU8t_Data, st_Length);
+	return FileHintCode::Success;
+}
+
+FileHintCode FileOperation::rewrite(const uint8_t *pU8t_Data, size_t st_Length)
+{
+    // 删除原有所有数据,重新写入
+    if (!p_Impl || !pU8t_Data)
+    {
+        return FileHintCode::InvalidParameter;
+    }
+    p_Impl->vecU8t_Buffer.clear();
+    // 写入新数据
+    return write(0, pU8t_Data, st_Length);
+}
+
+FileHintCode FileOperation::append(const uint8_t *pU8t_Data, size_t st_Length)
+{
+    if (!p_Impl || !pU8t_Data)
+    {
+        return FileHintCode::InvalidParameter;
+    }
+    // 追加写入数据
+    p_Impl->vecU8t_Buffer.insert(p_Impl->vecU8t_Buffer.end(), pU8t_Data, pU8t_Data + st_Length);
+	return FileHintCode::Success;
+}
+
+FileHintCode FileOperation::flush()
+{
+    if (!p_Impl)
+    {
+        return FileHintCode::InvalidParameter;
+    }
+    // 将数据写入文件
+    std::ofstream fs_File(pSz_FilePath, std::ios::binary);
+    fs_File.write(reinterpret_cast<char*>(p_Impl->vecU8t_Buffer.data()), p_Impl->vecU8t_Buffer.size());
+    fs_File.close();
+	return FileHintCode::Success;
 }
