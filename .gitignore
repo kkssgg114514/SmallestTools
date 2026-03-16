@@ -1,0 +1,8 @@
+.idea/
+cmake-build-debug/
+build-codex/
+
+PngTool_demo.png
+PngTool_demo_source.png
+PngTool_demo_modified.png
+PngTool_demo_cropped.png
